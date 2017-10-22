@@ -7,69 +7,91 @@
 </template>
 
 <script>
+import AMap from 'AMap'
 export default {
   name: 'HelloWorld',
   data () {
     return {
       msg: 'Welcome to Your Vue.js App'
-    }
+    };
+  },
+  methods:{
   },
   mounted(){
-  	var vue=this;
-  	getLocation();
-  	function getLocation(){
-		  if (navigator.geolocation){ 
-		    navigator.geolocation.getCurrentPosition(showPosition,showError); 
-		  }else{ 
-		  	
-		  } 
-		}
-		function showPosition(position){ 
-			console.log(vue);
-			var aLis='';
-			position.coords.latitude?aLis+='<li>纬度:' + position.coords.latitude + '</li>':'';
-			position.coords.longitude?aLis+='<li>经度:' + position.coords.longitude + '</li>':'';
-			aLis+='<li>定位信息:</li>';
-			var y=[];
-			function getJsonMsg(json,key){
-				if (typeof(json)=='object') {
-					for (var key in json) {
-						getJsonMsg(json[key],key);
-					}
-				}else{
-					if (key) {
-						var keyJ=key+':'+json;
-						y.push(keyJ);
-					} else{
-						y.push(json);
+  	var v=this;
+  	console.log(v);
+  		var mapObj = new AMap.Map('iCenter');
+			mapObj.plugin('AMap.Geolocation', function() {
+				var geolocation = new AMap.Geolocation({
+					enableHighAccuracy: true, //是否使用高精度定位，默认:true
+					timeout: 10000, //超过10秒后停止定位，默认：无穷大
+					GeoLocationFirst: true, //默认为false，设置为true的时候可以调整PC端为优先使用浏览器定位，失败后使用IP定位
+					maximumAge: 0, //定位结果缓存0毫秒，默认：0
+					convert: true, //自动偏移坐标，偏移后的坐标为高德坐标，默认：true
+					showButton: false, //显示定位按钮，默认：true
+					showMarker: false, //定位成功后在定位到的位置显示点标记，默认：true
+					showCircle: false, //定位成功后用圆圈表示定位精度范围，默认：true
+					panToLocation: false, //定位成功后将定位到的位置作为地图中心点，默认：true
+					zoomToAccuracy: false //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
+				});
+				mapObj.addControl(geolocation);
+				geolocation.getCurrentPosition();
+				AMap.event.addListener(geolocation, 'complete', onComplete); //返回定位信息
+				AMap.event.addListener(geolocation, 'error', onError); //返回定位出错信息
+				function onComplete(res){
+					console.log(res);
+					if (res) {
+						var aLis='';
+						var y=[];
+						function getJsonMsg(json,key){
+							if (typeof(json)=='object') {
+								for (var key in json) {
+									getJsonMsg(json[key],key);
+								}
+							}else{
+								if (key) {
+									var keyJ=key+':'+json;
+									y.push(keyJ);
+								} else{
+									y.push(json);
+								}
+							}
+						}
+						getJsonMsg(res);
+						for(var i in y){
+							aLis+='<li>'+y[i]+'</li>';
+						}
+						v.$refs.ul.innerHTML=aLis;
 					}
 				}
-			}
-			getJsonMsg(position);
-			console.log(position);
-			for(var i in y){
-				aLis+='<li>'+y[i]+'</li>';
-			}
-			vue.$refs.ul.innerHTML=aLis;
-		}
-		function showError(error){ 
-			console.log();
-			switch(error.code) {
-				case error.PERMISSION_DENIED:
-					alert("定位失败,用户拒绝请求地理定位");
-					break;
-				case error.POSITION_UNAVAILABLE:
-					alert("定位失败,位置信息是不可用");
-					break;
-				case error.TIMEOUT:
-					alert("定位失败,请求获取用户位置超时");
-					break;
-				case error.UNKNOWN_ERROR:
-					alert("定位失败,定位系统失效");
-					break;
-			}
-			vue.$refs.ul.innerHTML='请检查浏览器定位权限为允许、手机网络和定位开启<br />Chrome、IOS10浏览器暂不支持';
-		}
+				function onError(err) {
+					console.log(err);
+					if (err) {
+						var aLis='';
+						var y=[];
+						function getJsonMsg(json,key){
+							if (typeof(json)=='object') {
+								for (var key in json) {
+									getJsonMsg(json[key],key);
+								}
+							}else{
+								if (key) {
+									var keyJ=key+':'+json;
+									y.push(keyJ);
+								} else{
+									y.push(json);
+								}
+							}
+						}
+						getJsonMsg(err);
+						for(var i in y){
+							aLis+='<li>'+y[i]+'</li>';
+						}
+						v.$refs.ul.innerHTML=aLis;
+					}
+				}
+			});
+  	
   }
 }
 </script>

@@ -6,7 +6,6 @@
 </template>
 
 <script>
-import from "http://webapi.amap.com/maps?v=1.4.0&key=a5c20321d024344056424ea6abf8f4e1";
 export default {
   name: 'app'
 }
